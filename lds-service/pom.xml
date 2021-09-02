@@ -32,6 +32,13 @@
             <artifactId>common-mvc</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.krakens</groupId>
+            <artifactId>java-grok</artifactId>
+            <version>0.1.9</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>

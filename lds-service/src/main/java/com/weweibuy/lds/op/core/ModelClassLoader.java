@@ -24,6 +24,7 @@ public class ModelClassLoader extends URLClassLoader {
         if (cls != null) {
             return cls;
         }
+        // TODO 类不存在长时间卡死
         cls = super.loadClass(name, resolve);
         return cls;
     }

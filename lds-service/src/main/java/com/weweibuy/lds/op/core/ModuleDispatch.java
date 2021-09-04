@@ -45,8 +45,7 @@ public class ModuleDispatch implements InitializingBean {
         return moduleHolder.findModule(systemId);
     }
 
-    private void scanAndUpdate() {
-        log.info("扫描模块开始");
+    public void scanAndUpdate() {
         ModuleScannerResult moduleScannerResult = moduleScanner.doScan();
         List<OpLogConvertModule> opLogConvertModuleList = moduleScannerResult.getOpLogModuleListRemove();
         List<OpLogModule> opLogModuleListAdd = moduleScannerResult.getOpLogModuleListAdd();
@@ -74,18 +73,38 @@ public class ModuleDispatch implements InitializingBean {
     private void updateModuleAndLog(ModuleScannerResult.OpLogModuleUpdate opLogModuleUpdate) {
         OpLogModule opLogModule = opLogModuleUpdate.getOpLogModuleUpdate();
         OpLogConvertModule moduleUpdate = opLogModuleUpdate.getModuleUpdate();
+
+        OpLogConvertModule newModule = null;
+        try {
+            newModule = opLogConvertModuleLoader.loadModule(opLogModule);
+        } catch (Exception e) {
+            log.error("加载操作日志模块: {}, 异常:", opLogModule, e);
+            return;
+        }
+        if (newModule == null) {
+            lodNoModule(opLogModule);
+            return;
+        }
         removeModuleAndLog(moduleUpdate);
-        addModuleAndLog(opLogModule);
+        moduleHolder.addModule(opLogModule.getSystemId(), newModule);
     }
 
     private void addModuleAndLog(OpLogModule opLogModule) {
         log.warn("加载操作日志模块: {}", opLogModule);
         try {
             OpLogConvertModule opLogConvertModule = opLogConvertModuleLoader.loadModule(opLogModule);
+            if (opLogConvertModule == null) {
+                lodNoModule(opLogModule);
+                return;
+            }
             moduleHolder.addModule(opLogModule.getSystemId(), opLogConvertModule);
         } catch (Exception e) {
             log.error("加载操作日志模块: {}, 异常:", opLogModule, e);
         }
+    }
+
+    private void lodNoModule(OpLogModule opLogModule) {
+        log.warn("日志模块: {}, 不存在无法加载", opLogModule);
     }
 
     private void removeModuleAndLog(OpLogConvertModule opLogConvertModule) {
@@ -104,7 +123,7 @@ public class ModuleDispatch implements InitializingBean {
         schedule = new ScheduledThreadPoolExecutor(1,
                 new LogExceptionThreadFactory("module-scan-schedule-"),
                 new ThreadPoolExecutor.DiscardPolicy());
-        schedule.scheduleAtFixedRate(this::scanAndUpdate, 5, 10, TimeUnit.SECONDS);
+        schedule.scheduleWithFixedDelay(this::scanAndUpdate, 5, 10, TimeUnit.SECONDS);
     }
 
 

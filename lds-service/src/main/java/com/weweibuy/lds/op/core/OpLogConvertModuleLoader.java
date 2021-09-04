@@ -26,6 +26,9 @@ public class OpLogConvertModuleLoader {
      */
     public OpLogConvertModule loadModule(OpLogModule opLogModule) throws Exception {
         Artifact artifact = MavenArtifactSupport.loadArtifact(opLogModule);
+        if (artifact == null) {
+            return null;
+        }
         return loadModule(opLogModule, artifact);
     }
 

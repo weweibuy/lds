@@ -1,6 +1,6 @@
 package com.weweibuy.lds.op.controller;
 
-import com.sun.org.apache.bcel.internal.generic.FNEG;
+import com.weweibuy.framework.common.core.model.dto.CommonCodeResponse;
 import com.weweibuy.framework.common.core.model.dto.CommonDataResponse;
 import com.weweibuy.lds.iop.OpLog;
 import com.weweibuy.lds.op.service.OpLogConvertService;
@@ -27,6 +27,12 @@ public class OpLogController {
             return CommonDataResponse.success(null);
         }
         return CommonDataResponse.success(opLogConvertService.convert(logStr));
+    }
+
+    @PostMapping("/scan")
+    public CommonCodeResponse scan() {
+        opLogConvertService.scan();
+        return CommonDataResponse.success();
     }
 
 

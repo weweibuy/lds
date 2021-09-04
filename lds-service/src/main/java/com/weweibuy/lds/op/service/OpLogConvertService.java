@@ -25,4 +25,8 @@ public class OpLogConvertService {
                 .map(m -> m.convert(logParam))
                 .orElse(null);
     }
+
+    public void scan() {
+        moduleDispatch.scanAndUpdate();
+    }
 }

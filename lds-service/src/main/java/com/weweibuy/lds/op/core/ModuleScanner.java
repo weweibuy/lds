@@ -97,6 +97,9 @@ public class ModuleScanner {
      */
     private boolean sameMd5(OpLogModule opLogModule, ModuleInfo moduleInfo) {
         Artifact artifact = MavenArtifactSupport.loadArtifact(opLogModule);
+        if (artifact == null) {
+            return true;
+        }
         return moduleInfo.sameMd5(artifact);
     }
 

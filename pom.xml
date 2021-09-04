@@ -12,6 +12,7 @@
     <modules>
         <module>lds-iop</module>
         <module>lds-service</module>
+        <module>lds-test</module>
     </modules>
 
     <properties>
@@ -43,6 +44,12 @@
             <dependency>
                 <groupId>com.weweibuy</groupId>
                 <artifactId>lds-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.weweibuy</groupId>
+                <artifactId>lds-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -9,6 +9,13 @@ package com.weweibuy.lds.iop;
 public interface OpLogHandler {
 
     /**
+     * 初始化方法
+     *
+     * @throws Exception
+     */
+    void init() throws Exception;
+
+    /**
      * 处理网关操作日志
      *
      * @param logParam
@@ -32,5 +39,11 @@ public interface OpLogHandler {
      */
     OpLog handlerMqOpLog(LogParam logParam);
 
+    /**
+     * 销毁方法
+     *
+     * @throws Exception
+     */
+    void destroy() throws Exception;
 
 }

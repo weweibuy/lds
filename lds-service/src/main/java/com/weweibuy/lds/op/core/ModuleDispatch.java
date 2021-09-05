@@ -54,6 +54,15 @@ public class ModuleDispatch implements InitializingBean {
         removeModule(opLogConvertModuleList);
         addModule(opLogModuleListAdd);
         updateModule(opLogModuleListUpdate);
+
+    }
+
+    public void scanAndUpdateHandleException() {
+        try {
+            scanAndUpdate();
+        } catch (Throwable e) {
+            log.error("执行扫描异常:", e);
+        }
     }
 
 
@@ -76,6 +85,7 @@ public class ModuleDispatch implements InitializingBean {
 
         OpLogConvertModule newModule = null;
         try {
+            // 加载模块
             newModule = opLogConvertModuleLoader.loadModule(opLogModule);
         } catch (Exception e) {
             log.error("加载操作日志模块: {}, 异常:", opLogModule, e);
@@ -85,6 +95,7 @@ public class ModuleDispatch implements InitializingBean {
             lodNoModule(opLogModule);
             return;
         }
+        // 卸载模块
         removeModuleAndLog(moduleUpdate);
         moduleHolder.addModule(opLogModule.getSystemId(), newModule);
     }
@@ -123,7 +134,7 @@ public class ModuleDispatch implements InitializingBean {
         schedule = new ScheduledThreadPoolExecutor(1,
                 new LogExceptionThreadFactory("module-scan-schedule-"),
                 new ThreadPoolExecutor.DiscardPolicy());
-        schedule.scheduleWithFixedDelay(this::scanAndUpdate, 5, 10, TimeUnit.SECONDS);
+        schedule.scheduleWithFixedDelay(this::scanAndUpdateHandleException, 5, 10, TimeUnit.SECONDS);
     }
 
 

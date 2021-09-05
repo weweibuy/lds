@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.aether.artifact.Artifact;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -104,17 +105,29 @@ public class OpLogConvertModuleLoader {
      * @param modelClassLoader
      * @return
      */
-    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) {
+    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) throws IOException {
         ServiceLoader<OpLogHandler> loader =
                 ServiceLoader.load(OpLogHandler.class, modelClassLoader);
         Iterator<OpLogHandler> iterator = loader.iterator();
         OpLogHandler handler = null;
-        if (iterator.hasNext()) {
-            handler = iterator.next();
+        try {
+            if (iterator.hasNext()) {
+                // 如果找不到类会抛出 ServiceConfigurationError
+                handler = iterator.next();
+            }
+        } catch (Throwable throwable) {
+            modelClassLoader.close();
+            throw Exceptions.system("加载模块 META-INF/services 配置类异常", throwable);
         }
         if (handler == null) {
+            modelClassLoader.close();
             throw Exceptions.business("无法加载到 OpLogHandler 的实现类");
         }
         return handler;
     }
+
+    private void closeClassLoader(ModelClassLoader modelClassLoader) throws IOException {
+        modelClassLoader.close();
+    }
+
 }

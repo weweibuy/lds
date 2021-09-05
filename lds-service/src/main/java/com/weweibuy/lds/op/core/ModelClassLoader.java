@@ -1,6 +1,5 @@
 package com.weweibuy.lds.op.core;
 
-import com.weweibuy.framework.common.core.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -26,11 +25,7 @@ public class ModelClassLoader extends URLClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        try {
-            return super.loadClass(name, resolve);
-        } catch (ClassNotFoundException e) {
-            throw Exceptions.system(e);
-        }
+        return super.loadClass(name, resolve);
     }
 
     /**

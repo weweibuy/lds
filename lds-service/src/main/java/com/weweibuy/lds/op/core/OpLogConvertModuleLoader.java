@@ -1,11 +1,19 @@
 package com.weweibuy.lds.op.core;
 
+import com.weweibuy.framework.common.core.exception.Exceptions;
+import com.weweibuy.lds.iop.OpLogHandler;
 import com.weweibuy.lds.op.model.po.OpLogModule;
 import com.weweibuy.lds.op.model.vo.ModuleInfo;
 import com.weweibuy.lds.op.support.MavenArtifactSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.aether.artifact.Artifact;
 import org.springframework.stereotype.Service;
+
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 
 /**
  * 模块加载器
@@ -63,12 +71,50 @@ public class OpLogConvertModuleLoader {
      * @throws Exception
      */
     private MavenRepOpLogConvertModule buildAndInitModule(OpLogModule opLogModule, Artifact artifact) throws Exception {
+        // 模型信息
         ModuleInfo moduleInfo = ModuleInfo.fromModuleAndArtifact(opLogModule, artifact);
-        MavenRepOpLogConvertModule mavenRepOpLogConvertModule = new MavenRepOpLogConvertModule(moduleInfo);
+
+        // 类加载器
+        ModelClassLoader modelClassLoader = new ModelClassLoader(artifactJarFileUrl(moduleInfo.getArtifact()));
+        // 加载 OpLogHandler
+        OpLogHandler opLogHandler = opLogHandler(modelClassLoader);
+        // 创建模块
+        MavenRepOpLogConvertModule mavenRepOpLogConvertModule =
+                new MavenRepOpLogConvertModule(moduleInfo, modelClassLoader, opLogHandler);
+
+        // 初始化模块
         mavenRepOpLogConvertModule.init();
+
         return mavenRepOpLogConvertModule;
 
     }
 
 
+    private URL artifactJarFileUrl(Artifact artifact) {
+        try {
+            return artifact.getFile().toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * 通过 ServiceLoader加载 OpLogHandler
+     *
+     * @param modelClassLoader
+     * @return
+     */
+    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) {
+        ServiceLoader<OpLogHandler> loader =
+                ServiceLoader.load(OpLogHandler.class, modelClassLoader);
+        Iterator<OpLogHandler> iterator = loader.iterator();
+        OpLogHandler handler = null;
+        if (iterator.hasNext()) {
+            handler = iterator.next();
+        }
+        if (handler == null) {
+            throw Exceptions.business("无法加载到 OpLogHandler 的实现类");
+        }
+        return handler;
+    }
 }

@@ -1,17 +1,9 @@
 package com.weweibuy.lds.op.core;
 
-import com.weweibuy.framework.common.core.exception.Exceptions;
 import com.weweibuy.lds.iop.LogParam;
 import com.weweibuy.lds.iop.OpLog;
 import com.weweibuy.lds.iop.OpLogHandler;
 import com.weweibuy.lds.op.model.vo.ModuleInfo;
-
-import java.io.File;
-import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 
 /**
  * maven 仓库操作日志模块
@@ -27,18 +19,12 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
 
     private OpLogHandler opLogHandler;
 
-    public MavenRepOpLogConvertModule(ModuleInfo moduleInfo) {
+    public MavenRepOpLogConvertModule(ModuleInfo moduleInfo, ModelClassLoader modelClassLoader, OpLogHandler opLogHandler) {
         this.moduleInfo = moduleInfo;
-        this.modelClassLoader = new ModelClassLoader(jarFileUrl(moduleInfo.getArtifact().getFile()));
+        this.modelClassLoader = modelClassLoader;
+        this.opLogHandler = opLogHandler;
     }
 
-    private URL jarFileUrl(File file) {
-        try {
-            return file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
 
     @Override
     public OpLog convert(LogParam logParam) {
@@ -52,21 +38,16 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
 
     @Override
     public void init() throws Exception {
-        ServiceLoader<OpLogHandler> loader = ServiceLoader.load(OpLogHandler.class, modelClassLoader);
-        Iterator<OpLogHandler> iterator = loader.iterator();
-        OpLogHandler handler = null;
-        if (iterator.hasNext()) {
-            handler = iterator.next();
-        }
-        if (handler == null) {
-            throw Exceptions.business("无法加载到 OpLogHandler 的实现类");
-        }
-        handler.init();
-        this.opLogHandler = handler;
+        opLogHandler.init();
     }
 
     @Override
     public void destroy() throws Exception {
-        opLogHandler.destroy();
+        try {
+            opLogHandler.destroy();
+        } finally {
+            modelClassLoader.close();
+            modelClassLoader = null;
+        }
     }
 }

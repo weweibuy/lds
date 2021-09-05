@@ -1,5 +1,6 @@
 package com.weweibuy.lds.iop;
 
+import com.weweibuy.lds.iop.model.TestModel;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TestOpLogHandler implements OpLogHandler {
 
 
+
     @Override
     public void init() throws Exception {
         log.info("初始化");
@@ -17,9 +19,11 @@ public class TestOpLogHandler implements OpLogHandler {
 
     @Override
     public OpLog handlerGwOpLog(LogParam logParam) {
+//        CommonCodeResponse success = CommonDataResponse.success();
+        TestModel testModel = new TestModel();
         log.info("操作日志参数: {}", logParam);
         OpLog opLog = new OpLog();
-        opLog.setOpType("test1");
+        opLog.setOpType("test3");
         return opLog;
     }
 

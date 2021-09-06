@@ -23,7 +23,7 @@ public class TestOpLogHandler implements OpLogHandler {
         TestModel testModel = new TestModel();
         log.info("操作日志参数: {}", logParam);
         OpLog opLog = new OpLog();
-        opLog.setOpType("test3");
+        opLog.setOpType("test1");
         return opLog;
     }
 

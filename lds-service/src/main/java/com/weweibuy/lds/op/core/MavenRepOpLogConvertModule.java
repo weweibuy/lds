@@ -19,10 +19,16 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
 
     private OpLogHandler opLogHandler;
 
-    public MavenRepOpLogConvertModule(ModuleInfo moduleInfo, ModelClassLoader modelClassLoader, OpLogHandler opLogHandler) {
+    private ModuleResource moduleResource;
+
+    public MavenRepOpLogConvertModule(ModuleInfo moduleInfo,
+                                      ModelClassLoader modelClassLoader,
+                                      OpLogHandler opLogHandler,
+                                      ModuleResource moduleResource) {
         this.moduleInfo = moduleInfo;
         this.modelClassLoader = modelClassLoader;
         this.opLogHandler = opLogHandler;
+        this.moduleResource = moduleResource;
     }
 
 
@@ -50,4 +56,11 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
             modelClassLoader = null;
         }
     }
+
+    @Override
+    public ModuleResource getResource() {
+        return moduleResource;
+    }
+
+
 }

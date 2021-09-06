@@ -3,30 +3,29 @@ package com.weweibuy.lds.op.core;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Enumeration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author durenhao
  * @date 2021/9/4 16:20
  **/
 @Slf4j
-public class ModelClassLoader extends URLClassLoader {
+public class ModelClassLoader extends ClassLoader {
 
-    private final Map<String, Class<?>> loadedClasses = new ConcurrentHashMap<String, Class<?>>();
+    private final ResourceProvider resourceProvider;
 
-
-    public ModelClassLoader(URL... urls) {
-        super(urls);
+    public ModelClassLoader(ResourceProvider resourceProvider) {
+        this.resourceProvider = resourceProvider;
     }
 
+    // TODO
     @Override
-    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        return super.loadClass(name, resolve);
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
+        return super.findClass(name);
     }
+
 
     /**
      * 直接从对的模块中获取资源
@@ -37,7 +36,38 @@ public class ModelClassLoader extends URLClassLoader {
      */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-        return super.findResources(name);
+        Enumeration<URL> resources = super.getResources(name);
+        if (resourceProvider != null) {
+            URL providedResource = resourceProvider.getResource(name);
+            if (resources != null) {
+                return new ResourceProvider.ResourcesEnum(providedResource, resources);
+            }
+        }
+        return resources;
+    }
+
+
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        if (resourceProvider != null) {
+            try {
+                InputStream is = resourceProvider.getResourceAsStream(name);
+                if (is != null) {
+                    return is;
+                }
+            } catch (IOException e) {
+            }
+        }
+        return super.getResourceAsStream(name);
+    }
+
+    @Override
+    public URL getResource(String name) {
+        URL resource = resourceProvider.getResource(name);
+        if (resource != null) {
+            return resource;
+        }
+        return super.getResource(name);
     }
 
 

@@ -1,6 +1,5 @@
 package com.weweibuy.lds.op.support;
 
-import com.weweibuy.framework.common.core.exception.Exceptions;
 import com.weweibuy.lds.op.model.po.OpLogModule;
 import org.appformer.maven.integration.MavenRepository;
 import org.appformer.maven.support.AFReleaseId;
@@ -48,11 +47,11 @@ public class MavenArtifactSupport {
         afReleaseId.setArtifactId(opLogModule.getMvnArtifactId());
         afReleaseId.setVersion(opLogModule.getMvnVersion());
         Artifact artifact = loadArtifact(afReleaseId);
-        try {
-            checkFile(artifact.getFile());
-        } catch (IOException e) {
-            throw Exceptions.uncheckedIO(e);
-        }
+//        try {
+//            checkFile(artifact.getFile());
+//        } catch (IOException e) {
+//            throw Exceptions.uncheckedIO(e);
+//        }
         return artifact;
     }
 

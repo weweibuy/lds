@@ -41,5 +41,11 @@ public interface OpLogConvertModule {
      */
     void destroy() throws Exception;
 
+    /**
+     * 获取资源
+     *
+     * @return
+     */
+    ModuleResource getResource();
 
 }

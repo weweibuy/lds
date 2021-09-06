@@ -75,13 +75,20 @@ public class OpLogConvertModuleLoader {
         // 模型信息
         ModuleInfo moduleInfo = ModuleInfo.fromModuleAndArtifact(opLogModule, artifact);
 
+        // 资源信息
+        ModuleResource moduleResource = ModuleResource.fromJarFile(artifact.getFile());
+
+        ResourceProvider resourceProvider = new ResourceProvider();
+
         // 类加载器
         ModelClassLoader modelClassLoader = new ModelClassLoader(artifactJarFileUrl(moduleInfo.getArtifact()));
         // 加载 OpLogHandler
         OpLogHandler opLogHandler = opLogHandler(modelClassLoader);
+
         // 创建模块
         MavenRepOpLogConvertModule mavenRepOpLogConvertModule =
-                new MavenRepOpLogConvertModule(moduleInfo, modelClassLoader, opLogHandler);
+                new MavenRepOpLogConvertModule(moduleInfo, modelClassLoader,
+                        opLogHandler, moduleResource);
 
         // 初始化模块
         mavenRepOpLogConvertModule.init();
@@ -108,6 +115,7 @@ public class OpLogConvertModuleLoader {
     private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) throws IOException {
         ServiceLoader<OpLogHandler> loader =
                 ServiceLoader.load(OpLogHandler.class, modelClassLoader);
+
         Iterator<OpLogHandler> iterator = loader.iterator();
         OpLogHandler handler = null;
         try {

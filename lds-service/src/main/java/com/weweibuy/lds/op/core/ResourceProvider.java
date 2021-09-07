@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * 资源提供器
@@ -16,21 +17,20 @@ import java.util.Enumeration;
  **/
 class ResourceProvider {
 
-    private final OpLogConvertModule opLogConvertModule;
-
     private final URL moduleUrl;
 
-    ResourceProvider(OpLogConvertModule opLogConvertModule, URL moduleUrl) {
-        this.opLogConvertModule = opLogConvertModule;
+    private final ModuleResource moduleResource;
+
+    ResourceProvider(URL moduleUrl, ModuleResource moduleResource) {
         this.moduleUrl = moduleUrl;
+        this.moduleResource = moduleResource;
     }
 
     public InputStream getResourceAsStream(String name) throws IOException {
         if (name.endsWith("/")) {
             name = name.substring(0, name.length() - 1);
         }
-        ModuleResource resource = opLogConvertModule.getResource();
-        return resource.getResourceInputStream(name)
+        return moduleResource.getResourceInputStream(name)
                 .orElse(null);
     }
 
@@ -38,7 +38,7 @@ class ResourceProvider {
         if (name.endsWith("/")) {
             name = name.substring(0, name.length() - 1);
         }
-        boolean present = opLogConvertModule.getResource().getResourceByte(name)
+        boolean present = moduleResource.getResourceByte(name)
                 .filter(ArrayUtils::isNotEmpty)
                 .isPresent();
         return present ? createURLForResource(name) : null;
@@ -51,6 +51,12 @@ class ResourceProvider {
             return null;
         }
     }
+
+
+    public Map<String, byte[]> getClassesMap() {
+        return moduleResource.getClassesMap();
+    }
+
 
     static class ResourcesEnum implements Enumeration<URL> {
 
@@ -71,7 +77,6 @@ class ResourceProvider {
         public URL nextElement() {
             if (providedResource != null) {
                 URL result = providedResource;
-                providedResource = null;
                 return result;
             }
             return resources.nextElement();

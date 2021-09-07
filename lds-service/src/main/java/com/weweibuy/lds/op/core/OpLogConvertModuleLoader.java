@@ -6,15 +6,16 @@ import com.weweibuy.lds.op.model.po.OpLogModule;
 import com.weweibuy.lds.op.model.vo.ModuleInfo;
 import com.weweibuy.lds.op.support.MavenArtifactSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.artifact.Artifact;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.ServiceLoader;
+import java.util.Properties;
 
 /**
  * 模块加载器
@@ -25,6 +26,10 @@ import java.util.ServiceLoader;
 @Slf4j
 @Service
 public class OpLogConvertModuleLoader {
+
+    private static final String CONF_FILE = "META-INF/op.conf";
+
+    private static final String LAUNCHER_CLASS = "launcher";
 
 
     /**
@@ -78,10 +83,11 @@ public class OpLogConvertModuleLoader {
         // 资源信息
         ModuleResource moduleResource = ModuleResource.fromJarFile(artifact.getFile());
 
-        ResourceProvider resourceProvider = new ResourceProvider();
+        ResourceProvider resourceProvider = new ResourceProvider(
+                moduleInfo.getArtifact().getFile().toURI().toURL(), moduleResource);
 
         // 类加载器
-        ModelClassLoader modelClassLoader = new ModelClassLoader(artifactJarFileUrl(moduleInfo.getArtifact()));
+        ModelClassLoader modelClassLoader = new ModelClassLoader(resourceProvider);
         // 加载 OpLogHandler
         OpLogHandler opLogHandler = opLogHandler(modelClassLoader);
 
@@ -112,30 +118,29 @@ public class OpLogConvertModuleLoader {
      * @param modelClassLoader
      * @return
      */
-    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) throws IOException {
-        ServiceLoader<OpLogHandler> loader =
-                ServiceLoader.load(OpLogHandler.class, modelClassLoader);
+    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
 
-        Iterator<OpLogHandler> iterator = loader.iterator();
-        OpLogHandler handler = null;
-        try {
-            if (iterator.hasNext()) {
-                // 如果找不到类会抛出 ServiceConfigurationError
-                handler = iterator.next();
+        Properties properties = new Properties();
+        try (InputStream resourceAsStream = modelClassLoader.getResourceAsStream(CONF_FILE)) {
+            if (resourceAsStream == null) {
+                throw Exceptions.system(CONF_FILE + "META-INF 配置不存在");
             }
-        } catch (Throwable throwable) {
-            modelClassLoader.close();
-            throw Exceptions.system("加载模块 META-INF/services 配置类异常", throwable);
+            properties.load(resourceAsStream);
         }
+        String launcher = (String) properties.get("launcher");
+        if (StringUtils.isBlank(launcher)) {
+            throw Exceptions.system("加载模块 " + CONF_FILE + " 配置类异常");
+        }
+
+        Class<?> clazz = Class.forName(launcher, false, modelClassLoader);
+
+        OpLogHandler handler = OpLogHandler.class.cast(clazz.newInstance());
+
         if (handler == null) {
-            modelClassLoader.close();
             throw Exceptions.business("无法加载到 OpLogHandler 的实现类");
         }
         return handler;
     }
 
-    private void closeClassLoader(ModelClassLoader modelClassLoader) throws IOException {
-        modelClassLoader.close();
-    }
 
 }

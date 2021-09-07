@@ -52,7 +52,6 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
         try {
             opLogHandler.destroy();
         } finally {
-            modelClassLoader.close();
             modelClassLoader = null;
         }
     }

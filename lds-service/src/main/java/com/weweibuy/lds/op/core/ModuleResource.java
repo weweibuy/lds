@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -33,6 +35,17 @@ class ModuleResource {
         return getResourceByte(name)
                 .map(ByteArrayInputStream::new);
     }
+
+
+    public Map<String, byte[]> getClassesMap() {
+        Map<String, byte[]> classes = new HashMap<String, byte[]>();
+        return fileNames.stream()
+                .filter(n -> n.endsWith(".class"))
+                .collect(Collectors.toMap(Function.identity(),
+                        n -> zipEntries.get(n), (o, n) -> n));
+    }
+
+
 
     /**
      * 获取指定资源 byte数组

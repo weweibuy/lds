@@ -17,8 +17,14 @@ import java.util.Map;
  **/
 class ResourceProvider {
 
+    /**
+     * jar 包地址
+     */
     private final URL moduleUrl;
 
+    /**
+     * JAR 包资源信息
+     */
     private final ModuleResource moduleResource;
 
     ResourceProvider(URL moduleUrl, ModuleResource moduleResource) {
@@ -44,6 +50,12 @@ class ResourceProvider {
         return present ? createURLForResource(name) : null;
     }
 
+    /**
+     * 创建资源地址
+     *
+     * @param name
+     * @return
+     */
     private URL createURLForResource(String name) {
         try {
             return new URL("jar", "", moduleUrl + "!/" + name);
@@ -58,6 +70,9 @@ class ResourceProvider {
     }
 
 
+    /**
+     * 自定义资源实现, 先使用当前包下的资源, 在使用项目本身的资源
+     */
     static class ResourcesEnum implements Enumeration<URL> {
 
         private URL providedResource;
@@ -77,6 +92,7 @@ class ResourceProvider {
         public URL nextElement() {
             if (providedResource != null) {
                 URL result = providedResource;
+                providedResource = null;
                 return result;
             }
             return resources.nextElement();

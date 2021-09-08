@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 模块类加载器
+ * 类加载方式 -->  先尝试双亲委派  --> 找不到类则 加载模块下载的class文件
+ * 资源加载方式 --> 先加载模块下的资源 -->  找不到则 加载项目下的资源2
+ *
  * @author durenhao
  * @date 2021/9/4 16:20
  **/
@@ -19,6 +23,9 @@ public class ModelClassLoader extends ClassLoader {
 
     private final ResourceProvider resourceProvider;
 
+    /**
+     * class 名 字节码byte map
+     */
     private Map<String, byte[]> classNameStore;
 
 

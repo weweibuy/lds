@@ -15,14 +15,14 @@ public class MavenRepOpLogConvertModule implements OpLogConvertModule {
 
     private ModuleInfo moduleInfo;
 
-    private ModelClassLoader modelClassLoader;
+    private ModuleClassLoader modelClassLoader;
 
     private OpLogHandler opLogHandler;
 
     private ModuleResource moduleResource;
 
     public MavenRepOpLogConvertModule(ModuleInfo moduleInfo,
-                                      ModelClassLoader modelClassLoader,
+                                      ModuleClassLoader modelClassLoader,
                                       OpLogHandler opLogHandler,
                                       ModuleResource moduleResource) {
         this.moduleInfo = moduleInfo;

@@ -87,7 +87,7 @@ public class OpLogConvertModuleLoader {
                 moduleInfo.getArtifact().getFile().toURI().toURL(), moduleResource);
 
         // 类加载器
-        ModelClassLoader modelClassLoader = new ModelClassLoader(resourceProvider);
+        ModuleClassLoader modelClassLoader = new ModuleClassLoader(resourceProvider);
         // 加载 OpLogHandler
         OpLogHandler opLogHandler = opLogHandler(modelClassLoader);
 
@@ -118,7 +118,7 @@ public class OpLogConvertModuleLoader {
      * @param modelClassLoader
      * @return
      */
-    private OpLogHandler opLogHandler(ModelClassLoader modelClassLoader) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    private OpLogHandler opLogHandler(ModuleClassLoader modelClassLoader) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
 
         Properties properties = new Properties();
         try (InputStream resourceAsStream = modelClassLoader.getResourceAsStream(CONF_FILE)) {

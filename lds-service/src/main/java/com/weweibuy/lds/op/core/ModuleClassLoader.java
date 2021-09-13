@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2021/9/4 16:20
  **/
 @Slf4j
-public class ModelClassLoader extends ClassLoader {
+public class ModuleClassLoader extends ClassLoader {
 
     private final ResourceProvider resourceProvider;
 
@@ -29,7 +29,7 @@ public class ModelClassLoader extends ClassLoader {
     private Map<String, byte[]> classNameStore;
 
 
-    public ModelClassLoader(ResourceProvider resourceProvider) {
+    public ModuleClassLoader(ResourceProvider resourceProvider) {
         this.resourceProvider = resourceProvider;
         initClassNameStore();
     }

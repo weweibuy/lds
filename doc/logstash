@@ -1,0 +1,5 @@
+docker 安装
+docker run -d -it --add-host=kafka-server:122.51.171.126  -v /docker/logstash/config/:/usr/share/logstash/config/  -v /docker/logstash/pipeline:/usr/share/logstash/pipeline/ --network es-net  --name logstash logstash:7.5.0
+
+
+docker run -d -it  --add-host=kafka-server:122.51.171.126 -v /docker/logstash/config/:/usr/share/logstash/config/  -v /docker/logstash/pipeline:/usr/share/logstash/pipeline/ --network es-net  --name logstash logstash:7.5.0
